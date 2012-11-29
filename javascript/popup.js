@@ -5,8 +5,6 @@ function setPasswordColors(foreground, background) {
     $("#generated").css("color", foreground);        
     $("#password").css("background-color", background);
     $("#password").css("color", foreground);        
-    $("#confirmation").css("background-color", background);
-    $("#confirmation").css("color", foreground);        
 }
 
 function getAutoProfileIdForUrl(url) {
@@ -48,7 +46,6 @@ function getAutoProfileIdForUrl(url) {
 
 function updateFields(e) {
     var password = $("#password").val();
-    var confirmation = $("#confirmation").val();
     var usedtext = $("#usedtext").val();
     
     var profileId = $("#profile").val();
@@ -67,15 +64,11 @@ function updateFields(e) {
     if (password == "") {
         $("#generatedForClipboard").val("");
         $("#generated").val("Enter password");
-        setPasswordColors("#000000", "#85FFAB")
+        setPasswordColors("#000000", "#efefef")
     } else if ( ! matchesHash(password) ) {
         $("#generatedForClipboard").val("");
         $("#generated").val("Master password mismatch");
-        setPasswordColors("#FFFFFF", "#FF7272")
-    } else if (!Settings.keepMasterPasswordHash() && password != confirmation) {
-        $("#generatedForClipboard").val("");
-        $("#generated").val("Password wrong");
-        setPasswordColors("#FFFFFF", "#FF7272")
+        setPasswordColors("#000000", "#ffc9bb")
     } else {        
         if (profile != null) {
             var generatedPassword = profile.getPassword($("#usedtext").val(), password);
@@ -92,11 +85,6 @@ function updateFields(e) {
         showCopy();
     } else {
         hideCopy();
-    }
-    if (Settings.keepMasterPasswordHash()) {
-      $("#confirmation_row").css('display', 'none');
-    } else {
-      $("#confirmation_row").css('display', 'block');
     }
 }
 
@@ -140,7 +128,6 @@ function showCopy() {
 function init(url) {
     Settings.getPassword(function(password) {
         $("#password").val(password);
-        $("#confirmation").val(password);
 
         var activeProfileId = Settings.getActiveProfileId();    
         var autoProfileId = getAutoProfileIdForUrl(url);
@@ -173,7 +160,7 @@ function init(url) {
         });
 
         password = $("#password").val();
-        if (password == null || password.length == 0 || (password != $("#confirmation").val())) {
+        if (password == null || password.length == 0) {
             $("#password").focus();
         } else {
             $("#generated").focus();
@@ -205,7 +192,6 @@ function showPasswordField() {
 
 $(function() {
     $("#password").bind('keyup change', updateFields);
-    $("#confirmation").bind('keyup change', updateFields);
     $("#usedtext").bind('keyup change', updateFields);
     $("#store_location").bind('change', updateFields);
     $("#profile").bind('change', onProfileChanged);
@@ -257,10 +243,7 @@ $(function() {
   // Tab navigation workaround, see http://code.google.com/p/chromium/issues/detail?id=122352
   // Use Enter instead of Tab
   $("#password").keypress(function(event) {
-    if (event.keyCode == 13 && !Settings.keepMasterPasswordHash()) {
-      $("#confirmation").focus();
-    }
-    else if (event.keyCode == 13) {
+    if (event.keyCode == 13) {
       chrome.tabs.sendRequest(currentTab, {hasPasswordField: true}, function(response) {
         if (response.hasField) {
           fillPassword();

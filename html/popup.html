@@ -22,18 +22,16 @@
         <script type="text/javascript" src="../javascript/sjcl.js"></script>
     </head>
     <body>
-        <div id='head'>
-            <img src='../images/passwdmaker16.png' width='16' height='16' alt=""/><span>PasswordMaker Pro</span>
-        </div>
         <form>
         <div class='row'><label for='password'>Password:</label><input class='input' id='password' type="password" autofocus /></div>
-        <div class='row' id='confirmation_row'><label for='confirmation'>Confirmation:</label><input class='input' id='confirmation' type="password"/></div>
-        <div class='row'><label>Save Password:</label>
-            <select id="store_location" name="store_location">
-                  <option value="memory">In memory</option>
-                  <option value="disk">On disk</option>
-                  <option value="never">Never store</option>
-            </select>    
+        <div style="display: none">
+            <div class='row'><label>Save Password:</label>
+                <select id="store_location" name="store_location">
+                      <option value="memory">In memory</option>
+                      <option value="disk">On disk</option>
+                      <option value="never" selected="selected">Never store</option>
+                </select>    
+            </div>
         </div>
         <div class='row'><label>Use Profile:</label>
             <select id="profile" name="profile">
