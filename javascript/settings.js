@@ -183,10 +183,10 @@ Settings.loadRemoteProfiles = function(){
   remote_profiles = [];
   data = RemoteStorage.get();
   if(data && data['profiles']){
-    remote = data['profiles'];
-    $.each(json, function(i) {
+    profiles = data['profiles'];
+    $.each(profiles, function(i) {
         p = new Profile();
-        $.each(json[i], function(key, value) {
+        $.each(profiles[i], function(key, value) {
             p[key] = value;
         });
         remote_profiles.push(p);
