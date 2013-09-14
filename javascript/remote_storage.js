@@ -11,9 +11,14 @@ RemoteStorage.set = function(data, callback) {
     dataType: 'json',
     async: false,
     data: data,
-    success: function (data){
-      callback(data);
-    }
+    success: function (resp){
+      callback(resp);
+    },
+    error: function(error) {
+      if(typeof(safeAlert) == "function"){
+        safeAlert('Could not save remote profiles - ' + error.statusText);
+      }
+    }    
   });
 }
 

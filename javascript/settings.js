@@ -205,17 +205,22 @@ Settings.profilesByUniqueId = function(profiles) {
 
 Settings.processRemoteProfiles = function(){
   remote_profiles = Settings.loadRemoteProfiles();
-  remote_profiles_by_id = Settings.profilesByUniqueId(remote_profiles);
-  local_profiles = Settings.profiles;
-  $.each(local_profiles, function(i){
-    uniq_id = local_profiles[i].uniq_id
-    if(remote_profile = remote_profiles_by_id[uniq_id]){
-      Settings.profiles[i] = remote_profile;
-      delete remote_profiles_by_id[uniq_id]
+  if (localStorage["profiles"] == null || localStorage["profiles"] == "") {
+    Settings.profiles = remote_profiles;
+    Settings.saveProfiles();
+  } else {
+    remote_profiles_by_id = Settings.profilesByUniqueId(remote_profiles);
+    local_profiles = Settings.profiles;
+    $.each(local_profiles, function(i){
+      uniq_id = local_profiles[i].uniq_id
+      if(remote_profile = remote_profiles_by_id[uniq_id]){
+        Settings.profiles[i] = remote_profile;
+        delete remote_profiles_by_id[uniq_id]
+      }
+    });
+    for(var profile_key in remote_profiles_by_id){
+      Settings.profiles.push(remote_profiles_by_id[profile_key]);
     }
-  });
-  for(var profile_key in remote_profiles_by_id){
-    Settings.profiles.push(remote_profiles_by_id[profile_key]);
   }
 }
 
@@ -276,9 +281,6 @@ Settings.saveSyncedProfiles = function(data) {
 
 Settings.saveRemoteProfiles = function(data) {
     RemoteStorage.set({ 'profiles' : data }, function(response) {
-        for(i = 0; i < data.length; i++){
-          data[i]['uniq_id'] = Settings.makeUniqueId();
-        }
         if(response.success == false){
           alert("Could not sync data");
         }
@@ -289,7 +291,16 @@ Settings.saveProfiles = function() {
     stringified = JSON.stringify(Settings.profiles);
     localStorage["profiles"] = stringified;
     if (Settings.shouldSaveRemoteProfiles()) {
-        Settings.saveRemoteProfiles(JSON.parse(localStorage["profiles"]));
+      remote_profiles = []
+      for(var i in Settings.profiles){
+        profile = Settings.profiles[i];
+        if(profile.store_remotely == true || profile.store_remotely == "true"){
+          remote_profiles.push(JSON.parse(JSON.stringify(profile)));
+        }
+      }
+      if(remote_profiles.length > 0){
+        Settings.saveRemoteProfiles(remote_profiles);
+      }
     }
     if (Settings.shouldSyncProfiles() &&
         (!Settings.syncDataAvailable || Settings.syncPasswordOk)) {
@@ -401,8 +412,6 @@ Settings.getRemoteProfileUrl = function() {
 }
 
 Settings.setShouldSaveRemoteProfiles = function(val) {
-  console.log(val);
-  console.log( Boolean(val));
   localStorage["should_use_remote_profile"] = Boolean(val);
 }
 
