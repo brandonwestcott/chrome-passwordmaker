@@ -187,7 +187,11 @@ Settings.loadRemoteProfiles = function(){
     $.each(profiles, function(i) {
         p = new Profile();
         $.each(profiles[i], function(key, value) {
+          if(value == "true" || value == "false"){
+            p[key] = value == "true" ? true : false;
+          } else {
             p[key] = value;
+          }
         });
         remote_profiles.push(p);
     });
