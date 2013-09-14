@@ -1,15 +1,18 @@
 function Profile() {
     this.id = 1;
     this.title = "Default";
-    
+
     this.siteList = "";
-    
+
     // Settings for the URL generation
     this.url_protocol = false;
     this.url_subdomain = false;
     this.url_domain = true;
     this.url_path = false;
-    
+
+    this.uniq_id = Settings.makeUniqueId();
+    this.store_remotely = false;
+
     // Settings for the key generation
     this.hashAlgorithm = "md5"
     this.username = ""
@@ -40,7 +43,7 @@ Profile.prototype.getPassword = function(url, masterkey) {
         this.generateCharacter(this.hashAlgorithm, masterkey,
           url + this.username + this.modifier, this.whereToUseL33t, this.l33tLevel,
           this.selectedCharset) :
-        this.generateCharacter(this.hashAlgorithm, masterkey + '\n' + count, 
+        this.generateCharacter(this.hashAlgorithm, masterkey + '\n' + count,
           url + this.username + this.modifier, this.whereToUseL33t, this.l33tLevel,
           this.selectedCharset);
       count++;
@@ -60,7 +63,7 @@ Profile.prototype.generateCharacter = function(hashAlgorithm, key, data, whereTo
     // for non-hmac algorithms, the key is master pw and url concatenated
     var usingHMAC = hashAlgorithm.indexOf("hmac") > -1;
     if (!usingHMAC) {
-        key += data; 
+        key += data;
     }
 
     // apply l33t before the algorithm?

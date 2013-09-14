@@ -5,6 +5,7 @@
         <link rel="stylesheet" type="text/css" href="../css/options.css">
         <script type="text/javascript" src="../javascript/jquery.min.js"></script>
         <script type="text/javascript" src="../javascript/jquery-ui.min.js"></script>
+        <script type="text/javascript" src="../javascript/remote_storage.js" ></script>
         <script type="text/javascript" src="../javascript/settings.js" ></script>
         <script type="text/javascript" src="../javascript/profile.js" ></script>
         <script type="text/javascript" src="../javascript/options.js" ></script>
@@ -85,7 +86,15 @@
                             <label for="pathCB" class="checkbox">Port, path, anchor, query parameters</label>
                         </div>
                     </div>
-                    
+
+                    <div class="row remote_profiles">
+                        <label>Remote Storage</label>
+                        <div class="subrow">
+                            <input type="checkbox" id="storeProfileRemotely" />
+                            <label for="storeProfileRemotely" class="checkbox">Store Profile Remotely</label>
+                        </div>
+                    </div>
+
                     <div class="row">
                         <label for="whereLeetLB">Use l33t:</label>
             			<select class="dropmenu" id="whereLeetLB">
@@ -250,6 +259,23 @@
                             <input class="standard" type="password" id="masterPassword" />
                         </div>
                     </div>
+
+                    <div class="row">
+                        <div class="subrow">
+                            <input type="checkbox" id="shouldSaveRemoteProfiles" />
+                            <label for="shouldSaveRemoteProfiles" class="checkbox">Use custom remote profiles storage</label>
+                        </div>
+                        <div class="remote_profiles">
+                            <div class="subrow">
+                                <label for="remoteURL">Remote Profiles</label>
+                                <input type="input" id="remoteURL" />
+                            </div>
+                            <div id="sync_buttons">
+                                <div id="updateRemoteURL"><a href="#" class="awesome button">Set Profile URL</a></div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="row">
             		<div class="subrow">
                             <input type="checkbox" id="syncProfiles" />

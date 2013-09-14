@@ -124,13 +124,20 @@ Settings.getMaxId = function() {
     return maxId;
 }
 
+Settings.makeUniqueId = function(){
+  code = function(){
+    return String.fromCharCode(65 + Math.floor(Math.random() * 26))
+  }
+  return code() + code() + code() + Date.now();
+}
+
 Settings.addProfile = function(profile) {
     if (Settings.profiles == null) {
         Settings.getProfiles();
     }
-    
+
     profile.id = Settings.getMaxId() + 1;
-    
+
     Settings.profiles.push(profile);
 }
 
@@ -172,8 +179,53 @@ Settings.loadLocalProfiles = function() {
     }
 }
 
+Settings.loadRemoteProfiles = function(){
+  remote_profiles = [];
+  data = RemoteStorage.get();
+  if(data && data['profiles']){
+    remote = data['profiles'];
+    $.each(json, function(i) {
+        p = new Profile();
+        $.each(json[i], function(key, value) {
+            p[key] = value;
+        });
+        remote_profiles.push(p);
+    });
+  }
+  return remote_profiles;
+}
+
+Settings.profilesByUniqueId = function(profiles) {
+  hash = {};
+  $.each(profiles, function(i){
+    hash[profiles[i].uniq_id] = profiles[i];
+  });
+  return hash;
+}
+
+Settings.processRemoteProfiles = function(){
+  remote_profiles = Settings.loadRemoteProfiles();
+  remote_profiles_by_id = Settings.profilesByUniqueId(remote_profiles);
+  local_profiles = Settings.profiles;
+  $.each(local_profiles, function(i){
+    uniq_id = local_profiles[i].uniq_id
+    if(remote_profile = remote_profiles_by_id[uniq_id]){
+      Settings.profiles[i] = remote_profile;
+      delete remote_profiles_by_id[uniq_id]
+    }
+  });
+  for(var profile_key in remote_profiles_by_id){
+    Settings.profiles.push(remote_profiles_by_id[profile_key]);
+  }
+}
+
 Settings.loadProfiles = function() {
     Settings.loadLocalProfiles();
+
+    if(Settings.shouldSaveRemoteProfiles()){
+      Settings.processRemoteProfiles();
+    }
+
     if (localStorage["synced_profiles"] == null ||
         localStorage["synced_profiles"] == "") {
         return;
@@ -222,9 +274,23 @@ Settings.saveSyncedProfiles = function(data) {
     }
 }
 
+Settings.saveRemoteProfiles = function(data) {
+    RemoteStorage.set({ 'profiles' : data }, function(response) {
+        for(i = 0; i < data.length; i++){
+          data[i]['uniq_id'] = Settings.makeUniqueId();
+        }
+        if(response.success == false){
+          alert("Could not sync data");
+        }
+    });
+}
+
 Settings.saveProfiles = function() {
     stringified = JSON.stringify(Settings.profiles);
     localStorage["profiles"] = stringified;
+    if (Settings.shouldSaveRemoteProfiles()) {
+        Settings.saveRemoteProfiles(JSON.parse(localStorage["profiles"]));
+    }
     if (Settings.shouldSyncProfiles() &&
         (!Settings.syncDataAvailable || Settings.syncPasswordOk)) {
         encrypted = Settings.encrypt(
@@ -326,6 +392,24 @@ Settings.setKeepMasterPasswordHash = function(bool) {
   localStorage["keep_master_password_hash"] = bool;
 }
 
+Settings.setRemoteProfileUrl = function(string) {
+  localStorage["remote_profile_url"] = string;
+}
+
+Settings.getRemoteProfileUrl = function() {
+  return localStorage["remote_profile_url"];
+}
+
+Settings.setShouldSaveRemoteProfiles = function(val) {
+  console.log(val);
+  console.log( Boolean(val));
+  localStorage["should_use_remote_profile"] = Boolean(val);
+}
+
+Settings.shouldSaveRemoteProfiles = function() {
+  return Boolean(localStorage["should_use_remote_profile"] == 'true');
+}
+
 Settings.keepMasterPasswordHash = function() {
   bool = localStorage["keep_master_password_hash"];
   return bool == "true";
@@ -358,7 +442,7 @@ Settings.syncProfilesPassword = function() {
         return JSON.parse(localStorage["sync_profiles_password"]);
     } catch (e) {
         return "";
-    } 
+    }
 }
 
 Settings.clearSyncData = function(callback) {

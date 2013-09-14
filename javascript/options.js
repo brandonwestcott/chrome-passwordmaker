@@ -9,6 +9,10 @@ var CHARSET_OPTIONS = [
     "`~!@#$%^&*()_-+={}|[]:\";'<>?,./"
 ];
 
+function safeAlert(msg){
+    alert(msg);
+}
+
 function editProfile(event) {
     p = Settings.getProfile(event.data.id);
     setCurrentProfile(p);
@@ -69,7 +73,8 @@ function setCurrentProfile(profile) {
     $("#subdomainCB").attr('checked', profile.url_subdomain);
     $("#domainCB").attr('checked', profile.url_domain);
     $("#pathCB").attr('checked', profile.url_path);
-    
+    $("#storeProfileRemotely").attr('checked', profile.store_remotely);
+
     $("#whereLeetLB").val(profile.whereToUseL33t);
     $("#leetLevelLB").val(profile.l33tLevel);
     $("#hashAlgorithmLB").val(profile.hashAlgorithm);
@@ -175,6 +180,7 @@ function saveProfile() {
     currentProfile.url_path = $("#pathCB").attr('checked');
     currentProfile.whereToUseL33t = $("#whereLeetLB").val();
     currentProfile.l33tLevel      = $("#leetLevelLB").val();
+    currentProfile.store_remotely = $("#storeProfileRemotely").attr('checked');
     currentProfile.hashAlgorithm  = $("#hashAlgorithmLB").val();
     currentProfile.passwordLength = $("#passwdLength").val();
     currentProfile.username       = $("#usernameTB").val();
@@ -285,30 +291,57 @@ function updateSyncProfiles() {
 
 function updateMasterHash() {
     var should_keep = ($("#keepMasterPasswordHash").attr('checked') == true);
-    Settings.setKeepMasterPasswordHash(should_keep);    
+    Settings.setKeepMasterPasswordHash(should_keep);
     if ( should_keep ) {
       var master_pass = $("#masterPassword").val();
       var new_hash = ChromePasswordMaker_SecureHash.make_hash(master_pass);
       Settings.setMasterPasswordHash(new_hash);
       $("#master_password_row").css('visibility', 'visible');
     } else {
-      Settings.setMasterPasswordHash("");    
+      Settings.setMasterPasswordHash("");
       $("#master_password_row").css('visibility', 'hidden');
     }
 }
 
 function updateHidePassword() {
-    Settings.setHidePassword($("#hidePassword").attr('checked') == true);    
+    Settings.setHidePassword($("#hidePassword").attr('checked') == true);
 }
 
 function testPasswordLength() {
     if (/\D/.test(this.value)) this.value='8';
 }
 
+function updateRemoteURL() {
+    Settings.setRemoteProfileUrl($("#remoteURL").val());
+    return false;
+}
+
+function toggleRemoteProfiles(){
+    if($('#shouldSaveRemoteProfiles').attr('checked')){
+        $(".remote_profiles").css('visibility', 'visible');
+    } else {
+        $(".remote_profiles").css('visibility', 'hidden');
+    }
+}
+
+function updateShouldSaveRemoteProfiles(){
+    bool = $('#shouldSaveRemoteProfiles').attr('checked');
+    Settings.setShouldSaveRemoteProfiles(bool);
+    toggleRemoteProfiles();
+    updateRemoteURL();
+}
+
 $(function() {
     updateProfileList();
     setCurrentProfile(Settings.getProfiles()[0]);
-    updateRemoveButton();    
+    updateRemoveButton();
+
+    $("#shouldSaveRemoteProfiles").attr('checked', Settings.shouldSaveRemoteProfiles());
+    $("#remoteURL").val(Settings.getRemoteProfileUrl());
+    toggleRemoteProfiles();
+    $("#shouldSaveRemoteProfiles").bind('change', updateShouldSaveRemoteProfiles);
+
+    $("#updateRemoteURL").bind('click', updateRemoteURL);
 
     $("#hidePassword").attr('checked', Settings.shouldHidePassword());
     $("#keepMasterPasswordHash").attr('checked', Settings.keepMasterPasswordHash());
