@@ -182,12 +182,12 @@ Settings.loadLocalProfiles = function() {
 Settings.loadRemoteProfiles = function(){
   remote_profiles = [];
   data = RemoteStorage.get();
-  if(data && data['profiles']){
-    profiles = data['profiles'];
+  if(data && data.length > 0){
+    profiles = data;
     $.each(profiles, function(i) {
         p = new Profile();
         $.each(profiles[i], function(key, value) {
-          if(value == "true" || value == "false"){
+          if(value === "true" || value === "false"){
             p[key] = value == "true" ? true : false;
           } else {
             p[key] = value;
@@ -284,7 +284,7 @@ Settings.saveSyncedProfiles = function(data) {
 }
 
 Settings.saveRemoteProfiles = function(data) {
-    RemoteStorage.set({ 'profiles' : data }, function(response) {
+    RemoteStorage.set(data, function(response) {
         if(response.success == false){
           alert("Could not sync data");
         }
@@ -299,7 +299,7 @@ Settings.saveProfiles = function() {
       for(var i in Settings.profiles){
         profile = Settings.profiles[i];
         if(profile.store_remotely == true || profile.store_remotely == "true"){
-          remote_profiles.push(JSON.parse(JSON.stringify(profile)));
+          remote_profiles.push(profile);
         }
       }
       if(remote_profiles.length > 0){

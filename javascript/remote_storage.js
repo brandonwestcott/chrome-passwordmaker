@@ -5,12 +5,16 @@ RemoteStorage.url = function() {
 }
 
 RemoteStorage.set = function(data, callback) {
+  post_data = {
+    "profiles": JSON.parse(JSON.stringify(data)),
+  }
+  console.log(data);
   jQuery.ajax({
     type: "POST",
     url: RemoteStorage.url(),
     dataType: 'json',
     async: false,
-    data: data,
+    data: post_data,
     success: function (resp){
       callback(resp);
     },
@@ -23,7 +27,7 @@ RemoteStorage.set = function(data, callback) {
 }
 
 RemoteStorage.get = function() {
-  data = {}
+  data = []
   jQuery.ajax({
     type: "GET",
     url: RemoteStorage.url(),
@@ -31,7 +35,7 @@ RemoteStorage.get = function() {
     async: false,
     success: function (response){
       if(response.success == true){
-        data = response['data']
+        data = response['data']['profiles']
       }
     },
     error: function(error) {
