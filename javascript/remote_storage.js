@@ -8,7 +8,6 @@ RemoteStorage.set = function(data, callback) {
   post_data = {
     "profiles": JSON.parse(JSON.stringify(data)),
   }
-  console.log(data);
   jQuery.ajax({
     type: "POST",
     url: RemoteStorage.url(),
